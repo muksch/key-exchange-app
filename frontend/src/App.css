@@ -1,0 +1,52 @@
+/* --- ZÁKLADNÍ LAYOUT --- */
+
+/* Zajistíme, že aplikace zabírá celou obrazovku */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nastavíme základní padding a mezery pro hlavní obsah */
+.listing-grid {
+  flex-grow: 1; /* Zajistí, že main zabere dostupný prostor */
+  padding: 20px;
+  max-width: 1200px; /* Omezení šířky pro velký desktop */
+  margin: 0 auto; /* Centrování obsahu */
+  width: 100%;
+}
+
+.listing-grid h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #0d47a1;
+}
+
+/* --- RESPOZNIVNÍ MŘÍŽKA (CSS Grid) --- */
+
+.listing-grid {
+  /* Nastavení Grid kontejneru */
+  display: grid;
+  /* Mezera mezi položkami */
+  gap: 30px;
+  /* Výchozí nastavení pro mobil: 1 sloupec */
+  grid-template-columns: 1fr;
+  justify-items: center; /* Centrování karet v mřížce */
+}
+
+/* --- Media Query: Tablet (od 600px) --- */
+@media (min-width: 600px) {
+  .listing-grid {
+    /* 2 sloupce, které se automaticky opakují a mají minimální šířku 250px */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    justify-items: initial;
+  }
+}
+
+/* --- Media Query: Desktop (od 1024px) --- */
+@media (min-width: 1024px) {
+  .listing-grid {
+    /* 3 sloupce pro širší obrazovky */
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

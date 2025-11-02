@@ -1,0 +1,94 @@
+/* --- 1. ZÁKLADNÍ STYL HEADERU --- */
+.main-header {
+  background-color: #0d47a1; /* Tmavě modrá, klidná barva */
+  color: white;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between; /* Rozdělení obsahu do stran */
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Jemný stín */
+}
+
+/* Styly pro všechny odkazy v headeru */
+.main-header a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.main-header a:hover {
+  color: #ffc107; /* Změna barvy při najetí (zlatá/žlutá) */
+}
+
+/* --- 2. LOGO --- */
+.logo-link {
+  display: flex; /* Použijeme flex, aby ikony a text byly vedle sebe */
+  align-items: center;
+  gap: 8px; /* Mezera mezi ikonou a textem */
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 700; /* Extra tučné */
+  letter-spacing: -0.5px;
+}
+
+.logo-icon {
+  font-size: 1.5rem; /* Menší velikost ikon, aby ladily k textu */
+  line-height: 1;
+}
+
+/* --- 3. NAVIGACE (UL) --- */
+.nav-list {
+  list-style: none; /* Odstranit tečky u seznamu */
+  padding: 0;
+  margin: 0;
+  display: flex; /* Seřadit položky do řádku */
+  gap: 25px;
+}
+
+.main-navigation {
+  /* Na mobilu by navigace měla být skrytá */
+  display: none;
+}
+
+/* --- 4. AKCE (TLAČÍTKA) --- */
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-button {
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap; /* Zabránit zalomení textu */
+}
+
+.signup-button {
+  background-color: #ffc107; /* Zlaté tlačítko pro registraci */
+  color: #0d47a1;
+}
+
+.signup-button:hover {
+  background-color: #ffca2c;
+  color: #0d47a1;
+}
+
+/* --- 5. RESPONZIVITA: TABLET A DESKTOP (od 768px) --- */
+@media (min-width: 768px) {
+  /* Zobrazit hlavní navigaci */
+  .main-navigation {
+    display: block;
+  }
+
+  .main-header {
+    padding: 15px 50px; /* Větší padding na desktopu */
+  }
+
+  .user-actions {
+    gap: 20px;
+  }
+}
