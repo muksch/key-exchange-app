@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import './Header.css';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
+  const { isLoggedIn, login, logout } = useAuth();
+
   return (
     <header className="main-header">
       <Link to="/" className="logo-link">
@@ -33,9 +36,15 @@ const Header = () => {
           Search
         </Link>
 
-        <Link to="/signup" className="action-button signup-button">
-          Sign Up
-        </Link>
+        {!isLoggedIn ? (
+          <button className="action-button signup-button" onClick={() => login()}>
+            Sign Up
+          </button>
+        ) : (
+          <button className="action-button signup-button" onClick={() => logout()}>
+            UserName
+          </button>
+        )}
       </div>
     </header>
   );
