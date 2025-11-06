@@ -1,10 +1,10 @@
 import ListingCard from '../components/shared/ListingCard';
 import { useAuth } from '../context/AuthContext';
-import { useListing } from '../context/ListingContext';
+import { useListings } from '../context/ListingContext';
 
 const HomePage = () => {
   const { isLoggedIn } = useAuth();
-  const { listing } = useListing();
+  const { listings, isLoading } = useListings();
 
   return (
     <div>
@@ -12,11 +12,8 @@ const HomePage = () => {
       {isLoggedIn && (
         <div>
           <h1>Available Key Exchanges</h1>
-          <main className="listing-grid">
-            {listing.map((listing) => (
-              <ListingCard key={listing.id} id={listing.id} title={listing.title} location={listing.location} points={listing.points} imageUrl={listing.imageUrl} />
-            ))}
-          </main>
+          {isLoading && <p>Loading data...</p>}
+          <main className="listing-grid">{!isLoading && listings.map((listing) => <ListingCard key={listing.id} id={listing.id} title={listing.title} location={listing.location} points={listing.points} imageUrl={listing.imageUrl} />)}</main>
         </div>
       )}
     </div>

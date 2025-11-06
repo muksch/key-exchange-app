@@ -1,25 +1,53 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { listingsCollectionRef, getDocs } from '../firebaseConfig';
 
-export const ListingContext = createContext();
+export const ListingsContext = createContext();
 
-export const ListingProvider = ({ children }) => {
-  const listing = [
-    { id: 1, title: 'Byt u moře', location: 'Split, Chorvatsko', points: 950, imageUrl: 'https://via.placeholder.com/300x200?text=Split+Home' },
-    { id: 2, title: 'Centrum Prahy', location: 'Praha 1, Česko', points: 1100, imageUrl: 'https://via.placeholder.com/300x200?text=Prague+Apt' },
-    { id: 3, title: 'Horská chata', location: 'Alpy, Rakousko', points: 750, imageUrl: 'https://via.placeholder.com/300x200?text=Alpine+Chalet' },
-  ];
+export const ListingsProvider = ({ children }) => {
+  const [listings, setListings] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+
+      try {
+        console.log('Loading listings');
+        const data = await getDocs(listingsCollectionRef);
+
+        const mappedListings = data.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+
+        setListings(mappedListings);
+        console.log('Listing loaded:', mappedListings);
+      } catch (error) {
+        console.error('Error fetching listings from Firestore:', error);
+        setListings([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const getListingById = (id) => {
-    const filteredListing = listing.filter((listingItem) => id === listingItem.id);
-    return filteredListing;
+    if (!listings) return undefined;
+    const listingIdString = String(id);
+    return listings.find((listingItem) => listingIdString === listingItem.id);
   };
 
   const contextValue = {
-    listing,
+    listings,
+    isLoading,
     getListingById,
   };
-  return <ListingContext.Provider value={contextValue}>{children}</ListingContext.Provider>;
+
+  return <ListingsContext.Provider value={contextValue}>{children}</ListingsContext.Provider>;
 };
 
-export const useListing = () => {
-  return useContext(ListingContext);
+export const useListings = () => {
+  return useContext(ListingsContext);
 };

@@ -1,9 +1,9 @@
 import { useParams } from 'react-router-dom';
-import { useListing } from '../context/ListingContext';
+import { useListings } from '../context/ListingContext';
 
 const ListingDetailPage = () => {
   const { listingId } = useParams();
-  const { getListingById } = useListing();
+  const { getListingById } = useListings();
   const listing = getListingById(listingId);
 
   if (!listing) {
