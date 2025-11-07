@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { listingsCollectionRef, getDocs } from '../firebaseConfig';
+import { listingsCollectionRef } from '../firebaseConfig';
+import { onSnapshot } from 'firebase/firestore';
 
 export const ListingsContext = createContext();
 
@@ -8,29 +9,30 @@ export const ListingsProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+    const unsubscribe = onSnapshot(
+      listingsCollectionRef,
+      (snapshot) => {
+        try {
+          const mappedListings = snapshot.docs.map((doc) => ({
+            ...doc.data(),
+            id: doc.id,
+          }));
 
-      try {
-        console.log('Loading listings');
-        const data = await getDocs(listingsCollectionRef);
-
-        const mappedListings = data.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-
-        setListings(mappedListings);
-        console.log('Listing loaded:', mappedListings);
-      } catch (error) {
-        console.error('Error fetching listings from Firestore:', error);
+          setListings(mappedListings);
+          setIsLoading(false);
+        } catch (error) {
+          console.error('Error mapping data from Firestore:', error);
+          setListings([]);
+          setIsLoading(false);
+        }
+      },
+      (error) => {
+        console.error('Connection error with Firestore:', error);
         setListings([]);
-      } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchData();
+    );
+    return () => unsubscribe();
   }, []);
 
   const getListingById = (id) => {
@@ -43,6 +45,7 @@ export const ListingsProvider = ({ children }) => {
     listings,
     isLoading,
     getListingById,
+    // Zde bude přidána funkce createListing
   };
 
   return <ListingsContext.Provider value={contextValue}>{children}</ListingsContext.Provider>;
