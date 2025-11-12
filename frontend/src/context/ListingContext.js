@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { listingsCollectionRef } from '../firebaseConfig';
-import { onSnapshot } from 'firebase/firestore';
+import { addDoc, onSnapshot } from 'firebase/firestore';
 
 export const ListingsContext = createContext();
 
@@ -41,11 +41,27 @@ export const ListingsProvider = ({ children }) => {
     return listings.find((listingItem) => listingIdString === listingItem.id);
   };
 
+  const createListing = async ({ title, location, points, imageUrl }) => {
+    try {
+      console.log('Vytvářím nový listing...'); // Přidej log
+      const docRef = await addDoc(listingsCollectionRef, {
+        title: title,
+        location: location,
+        points: points,
+        imageUrl: imageUrl,
+        createdAt: new Date().toISOString(),
+      });
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
   const contextValue = {
     listings,
     isLoading,
     getListingById,
-    // Zde bude přidána funkce createListing
+    createListing,
   };
 
   return <ListingsContext.Provider value={contextValue}>{children}</ListingsContext.Provider>;
