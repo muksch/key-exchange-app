@@ -1,16 +1,18 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useListings } from '../context/ListingContext';
 
 const CreateListingPage = () => {
   const navigate = useNavigate();
-  const { createListing } = useListings();
+  const { createListing, createListingImage } = useListings();
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: '',
     location: '',
-    points: 0,
-    imageUrl: 'https://via.placeholder.com/300x200?text=New+Listing',
+    points: 1,
+    imageFile: null,
+    space: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -22,10 +24,47 @@ const CreateListingPage = () => {
       [name]: type === 'number' ? Number(value) : value,
     }));
   };
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+
+    const resetSelection = () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      setFormData((prev) => ({
+        ...prev,
+        imageFile: null,
+      }));
+    };
+
+    if (!file) {
+      resetSelection();
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setError('Selected file must be an image.');
+      resetSelection();
+      return;
+    }
+
+    const MAX_SIZE_BYTES = 1_500_000;
+    if (file.size > MAX_SIZE_BYTES) {
+      setError('Image is too large (max 1.5 MB).');
+      resetSelection();
+      return;
+    }
+
+    setError(null);
+    setFormData((prev) => ({
+      ...prev,
+      imageFile: file,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.location || formData.points <= 0) {
+    if (!formData.title || !formData.location || formData.points <= 0 || !formData.imageFile || !formData.space) {
       setError('Please fill in all required fields and ensure Points > 0.');
       return;
     }
@@ -33,14 +72,41 @@ const CreateListingPage = () => {
     setIsSubmitting(true);
     setError(null);
 
-    const result = await createListing(formData);
+    try {
+      const uploadedImage = await createListingImage(formData.imageFile);
+      if (!uploadedImage?.success || !uploadedImage?.url) {
+        throw new Error(uploadedImage?.error || 'Image upload failed');
+      }
 
-    setIsSubmitting(false);
+      const payload = {
+        title: formData.title,
+        location: formData.location,
+        points: formData.points,
+        imageUrl: uploadedImage.url,
+        space: formData.space,
+      };
 
-    if (result.success) {
-      navigate('/');
-    } else {
-      setError(`Failed to create listing: ${result.error}`);
+      const result = await createListing(payload);
+
+      if (result.success) {
+        setFormData({
+          title: '',
+          location: '',
+          points: 1,
+          imageFile: null,
+          space: '',
+        });
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        navigate('/');
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (err) {
+      setError(`Failed to create listing: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -68,8 +134,13 @@ const CreateListingPage = () => {
         </div>
 
         <div>
-          <label htmlFor="imageUrl">URL obrázku (Optional)</label>
-          <input type="url" name="imageUrl" id="imageUrl" value={formData.imageUrl} onChange={handleChange} />
+          <label htmlFor="imageFile">Obrázek (soubor)</label>
+          <input ref={fileInputRef} id="imageFile" type="file" accept="image/*" onChange={handleFileChange} />
+        </div>
+
+        <div>
+          <label htmlFor="space">Velikost</label>
+          <input type="text" name="space" id="space" value={formData.space} onChange={handleChange} />
         </div>
 
         <button type="submit" disabled={isSubmitting}>

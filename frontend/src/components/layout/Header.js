@@ -1,9 +1,24 @@
 import { Link } from 'react-router-dom';
 import './Header.css';
 import { useAuth } from '../../context/AuthContext';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 const Header = () => {
   const { isLoggedIn, login, logout } = useAuth();
+  const [search, setSearch] = useState('');
+  let navigate = useNavigate();
+  const handleChange = (e) => {
+    setSearch(e.target.value);
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    navigate({
+      pathname: '/search',
+      search: `?q=${encodeURIComponent(search)}`,
+    });
+    setSearch('');
+  };
 
   return (
     <header className="main-header">
@@ -17,23 +32,21 @@ const Header = () => {
         </span>
       </Link>
 
-      <nav className="main-navigation">
-        <ul className="nav-list">
-          <li>
-            <Link to="/listings">My Homes</Link>
-          </li>
-          <li>
-            <Link to="/how-it-works">How It Works</Link>
-          </li>
-          <li>
-            <Link to="/points">My Points</Link>
-          </li>
-        </ul>
-      </nav>
+      <div className="search-bar">
+        <label htmlFor="searchQuery" className="visually-hidden">
+          Hledat
+        </label>
+        <form onSubmit={(e) => handleSubmit(e)}>
+          <input type="text" name="searchQuery" id="searchQuery" value={search} onChange={handleChange} />
+          <button type="submit" aria-label="Hledat">
+            🔎
+          </button>
+        </form>
+      </div>
 
       <div className="user-actions">
-        <Link to="/search" className="action-button search-button">
-          Search
+        <Link to="/create" className="action-button search-button">
+          Offer your keys
         </Link>
 
         {!isLoggedIn ? (

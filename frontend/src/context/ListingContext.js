@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { listingsCollectionRef } from '../firebaseConfig';
 import { addDoc, onSnapshot } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export const ListingsContext = createContext();
 
 export const ListingsProvider = ({ children }) => {
+  const storage = getStorage();
   const [listings, setListings] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,9 +43,20 @@ export const ListingsProvider = ({ children }) => {
     return listings.find((listingItem) => listingIdString === listingItem.id);
   };
 
+  const createListingImage = async (file) => {
+    try {
+      const metadata = { contentType: file?.type || 'image/jpeg' };
+      const uniqueName = `${crypto?.randomUUID ? crypto.randomUUID() : Date.now()}_${file.name}`;
+      const storageRef = ref(storage, 'images/' + uniqueName);
+      await uploadBytes(storageRef, file, metadata);
+      const downloadURL = await getDownloadURL(storageRef);
+      return { success: true, url: downloadURL, path: `images/${uniqueName}` };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
   const createListing = async ({ title, location, points, imageUrl }) => {
     try {
-      console.log('Vytvářím nový listing...'); // Přidej log
       const docRef = await addDoc(listingsCollectionRef, {
         title: title,
         location: location,
@@ -61,6 +74,7 @@ export const ListingsProvider = ({ children }) => {
     listings,
     isLoading,
     getListingById,
+    createListingImage,
     createListing,
   };
 
